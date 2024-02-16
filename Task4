@@ -1,0 +1,99 @@
+import java.util.*;
+
+public class QuizApplication {
+    private List<Question> questions;
+    private int currentQuestionIndex;
+    private int score;
+    private Scanner scanner;
+    
+    public QuizApplication() {
+        questions = new ArrayList<>();
+        scanner = new Scanner(System.in);
+        currentQuestionIndex = 0;
+        score = 0;
+    }
+    
+    public void addQuestion(Question question) {
+        questions.add(question);
+    }
+    
+    public void startQuiz() {
+        for (Question question : questions) {
+            displayQuestion(question);
+            if (submitAnswer(question)) {
+                score++;
+            }
+            System.out.println(); // Empty line for better readability
+        }
+        displayResult();
+    }
+    
+    private void displayQuestion(Question question) {
+        System.out.println(question.getQuestion());
+        for (int i = 0; i < question.getOptions().size(); i++) {
+            System.out.println((i + 1) + ". " + question.getOptions().get(i));
+        }
+        System.out.print("Enter your choice: ");
+    }
+    
+    private boolean submitAnswer(Question question) {
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            public void run() {
+                System.out.println("\nTime's up!");
+                scanner.nextLine(); // Consume any input
+            }
+        };
+        timer.schedule(task, 15000); // 15 seconds timer
+        
+        int choice = scanner.nextInt();
+        timer.cancel(); // Cancel the timer when the user submits an answer
+        
+        return question.isCorrect(choice - 1);
+    }
+    
+    private void displayResult() {
+        System.out.println("Quiz ended!");
+        System.out.println("Your score: " + score + "/" + questions.size());
+    }
+    
+    public static void main(String[] args) {
+        QuizApplication quizApp = new QuizApplication();
+        
+        // Sample questions
+        Question question1 = new Question("What is the capital of France?",
+                                           Arrays.asList("Paris", "Berlin", "London"),
+                                           0);
+        Question question2 = new Question("What is the largest planet in the solar system?",
+                                           Arrays.asList("Mars", "Jupiter", "Earth"),
+                                           1);
+        quizApp.addQuestion(question1);
+        quizApp.addQuestion(question2);
+        
+        quizApp.startQuiz();
+    }
+}
+
+class Question {
+    private String question;
+    private List<String> options;
+    private int correctAnswerIndex;
+    
+    public Question(String question, List<String> options, int correctAnswerIndex) {
+        this.question = question;
+        this.options = options;
+        this.correctAnswerIndex = correctAnswerIndex;
+    }
+    
+    public String getQuestion() {
+        return question;
+    }
+    
+    public List<String> getOptions() {
+        return options;
+    }
+    
+    public boolean isCorrect(int choice) {
+        return choice == correctAnswerIndex;
+    }
+}
